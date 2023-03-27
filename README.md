@@ -22,7 +22,7 @@ Install required packages
 ```
 $ sudo su
 $ apt-get update && apt-get upgrade -y
-$ apt-get install aria2c vim zsh php8.1 nodejs npm python3 python3-pip apache2 mysql-server
+$ apt-get install aria2c vim zsh php8.1 nodejs npm python3 python3-pip apache2 mysql-server unzip zip
 
 # Composer
 # Visit : https://getcomposer.org/download/
@@ -32,6 +32,12 @@ $ reboot
 ```
 
 ## Configuration
+
+```
+# php configuration
+
+sudo apt-get install php8-1-intl php8-1-gd php8-1-dom php8-1-zip php8-1-curl php8-1-opcache php8-1-mbstring php8-1-mysqli
+```
 
 ```
 # aria2c configuration 
@@ -76,6 +82,7 @@ alias ohmyzsh="vim ~/.oh-my-zsh"
 # mysql configuration 
 
 # First change the authentication plugin in my.cnf file
+
 [mysqld]
 
 default_authentication_plugin=mysql_native_password
@@ -90,21 +97,84 @@ $ SET GLOBAL validate_password.policy = 0;
 $ SET GLOBAL validate_password.mixed_case_count = 0;
 $ SET GLOBAL validate_password.number_count = 0;
 $ SET GLOBAL validate_password.special_char_count = 0;
-$ CREATE USER `{username}`@`localhost` IDENTIFIED WITH mysql_native_password BY `{password}`
+$ CREATE USER `{username}`@`{host}` IDENTIFIED WITH mysql_native_password BY `{password}`
+$ GRANT ALL PRIVILEGES ON *.* TO '{username}'@'{host}';
 $ FLUSH PRIVILEGES; 
 ```
 
 ```
 # apache2 configuration
 
-# enable a2nmod rewrite
+# enable a2enmod rewrite
 $ sudo a2enmod rewrite
+```
+
+Either change the root directory of Apache or move the project to `/var/www/html`.
+
+To change Apache's root directory, run:
+
+```
+$ cd /etc/apache2/sites-available
+```
+
+Then open the 000-default.conf file using the command:
+
+```
+$ nano 000-default.conf
+```
+
+Edit the DocumentRoot option:
+
+```
+DocumentRoot /home/{username}
+```
+
+Then restart the apache server:
+
+```
+$ sudo service apache2 restart
+```
+
+If you get Forbidden You don't have permission to access / on this server after changing the root of apache then do follow these steps
+
+```
+$ sudo cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.bak
+$ sudo vim /etc/apache2/apache2.conf
+
+# It should look like this 
+
+<Directory />
+  Options Indexes FollowSymLinks
+  AllowOverride All
+  Require all denied
+</Directory>
+
+# Change it to
+
+<Directory />
+  Options Indexes FollowSymLinks Includes ExecCGI
+  AllowOverride All
+  Require all granted
+</Directory>
+
+# And remove the line
+
+<Directory /var/www/>
+  Options Indexes FollowSymLinks
+  AllowOverride None
+  Require all granted
+</Directory>
+
+# Restart apache
+
+$ sudo systemctl restart apache2
 ```
 
 ```
 # yt-dlp configuration
 
 # Dont forget to backup config file
+$ mv ~/.config/yt-dlp/config ~/.config/yt-dlp/config.bak
 
 $ mkdir .config/yt-dlp
 $ cp yt-dlp/config ~/.config/yt-dlp/config
