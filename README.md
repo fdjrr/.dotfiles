@@ -14,6 +14,7 @@
 | mysql | MySQL is a database management system. |
 | apache2 | Apache is the most widely used webserver software |
 | yt-dlp | yt-dlp tries to parse the external downloader outputs into the standard progress output if possible (Currently implemented: aria2c ). |
+| rabbitmq | RabbitMQ is the most widely deployed open source message broker. |
 
 ## Installation
 
@@ -178,4 +179,16 @@ $ mv ~/.config/yt-dlp/config ~/.config/yt-dlp/config.bak
 
 $ mkdir .config/yt-dlp
 $ cp yt-dlp/config ~/.config/yt-dlp/config
+```
+
+```
+# rabbitmq-server configuration
+
+$ sudo apt-get install -y erlang-base erlang-asn1 erlang-crypto erlang-eldap erlang-ftp erlang-inets erlang-mnesia erlang-os-mon erlang-parsetools erlang-public-key erlang-runtime-tools erlang-snmp erlang-ssl erlang-syntax-tools erlang-tftp erlang-tools erlang-xmerl
+
+$ sudo apt-get install rabbitmq-server -y --fix-missing
+
+# enable management plugin
+
+$ sudo rabbitmq-plugins enable rabbitmq_management
 ```
