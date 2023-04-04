@@ -24,6 +24,8 @@ Install required packages
 $ sudo su
 $ apt-get update && apt-get upgrade -y
 $ apt-get install aria2c vim zsh php8.1 nodejs npm python3 python3-pip apache2 mysql-server unzip zip
+$ apt-get update && apt-get install -y software-properties-common
+$ apt-get update
 
 # Composer
 # Visit : https://getcomposer.org/download/
@@ -37,7 +39,19 @@ $ reboot
 ```
 # php configuration
 
-sudo apt-get install php8-1-intl php8-1-gd php8-1-dom php8-1-zip php8-1-curl php8-1-opcache php8-1-mbstring php8-1-mysqli
+# if your distro is Debian, Following the step.
+
+$ echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/sury-php.list
+$ curl -fsSL  https://packages.sury.org/php/apt.gpg| sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/sury-keyring.gpg
+
+# if your distro is Ubuntu
+
+$ sudo apt-get install php8.1-intl php8.1-gd php8.1-dom php8.1-zip php8.1-curl php8.1-opcache php8.1-mbstring php8.1-mysqli php8.1-dev php-pear
+
+# If you want connect MS-SQL
+
+$ sudo apt-get install unixodbc-dev msodbcsql17 mssql-tools
+$ sudo pecl install sqlsrv pdo_sqlsrv
 ```
 
 ```
@@ -84,6 +98,8 @@ alias ohmyzsh="vim ~/.oh-my-zsh"
 
 # First change the authentication plugin in my.cnf file
 
+$ nano /etc/mysql/mysql.conf/mysqld.cnf
+
 [mysqld]
 
 default_authentication_plugin=mysql_native_password
@@ -98,9 +114,9 @@ $ SET GLOBAL validate_password.policy = 0;
 $ SET GLOBAL validate_password.mixed_case_count = 0;
 $ SET GLOBAL validate_password.number_count = 0;
 $ SET GLOBAL validate_password.special_char_count = 0;
-$ CREATE USER `{username}`@`{host}` IDENTIFIED WITH mysql_native_password BY `{password}`
+$ CREATE USER '{username}'@'{host}' IDENTIFIED WITH mysql_native_password BY '{password}';
 $ GRANT ALL PRIVILEGES ON *.* TO '{username}'@'{host}';
-$ FLUSH PRIVILEGES; 
+$ FLUSH PRIVILEGES;
 ```
 
 ```
@@ -108,65 +124,32 @@ $ FLUSH PRIVILEGES;
 
 # enable a2enmod rewrite
 $ sudo a2enmod rewrite
-```
 
-Either change the root directory of Apache or move the project to `/var/www/html`.
+# either change the root directory of Apache or move the project to `/var/www/html`.
 
-To change Apache's root directory, run:
+# to change Apache's root directory, run:
 
-```
 $ cd /etc/apache2/sites-available
-```
 
-Then open the 000-default.conf file using the command:
+# then open the 000-default.conf file using the command:
 
-```
-$ nano 000-default.conf
-```
+$ sudo vim 000-default.conf
 
-Edit the DocumentRoot option:
+<VirtualHost *:80>
+  ServerName {subdomain}
+  DocumentRoot "{path}"
+  <Directory />
+    Options Indexes FollowSymLinks Includes ExecCGI
+    AllowOverride All
+    Require all granted
+  </Directory>
+</VirtualHost>
 
-```
-DocumentRoot /home/{username}
-```
+# then restart the apache server:
 
-Then restart the apache server:
+$ sudo systemctl restart apache2
 
-```
-$ sudo service apache2 restart
-```
-
-If you get Forbidden You don't have permission to access / on this server after changing the root of apache then do follow these steps
-
-```
-$ sudo cp /etc/apache2/apache2.conf /etc/apache2/apache2.conf.bak
-$ sudo vim /etc/apache2/apache2.conf
-
-# It should look like this 
-
-<Directory />
-  Options Indexes FollowSymLinks
-  AllowOverride All
-  Require all denied
-</Directory>
-
-# Change it to
-
-<Directory />
-  Options Indexes FollowSymLinks Includes ExecCGI
-  AllowOverride All
-  Require all granted
-</Directory>
-
-# And remove the line
-
-<Directory /var/www/>
-  Options Indexes FollowSymLinks
-  AllowOverride None
-  Require all granted
-</Directory>
-
-# Restart apache
+# restart apache
 
 $ sudo systemctl restart apache2
 ```
@@ -185,10 +168,14 @@ $ cp yt-dlp/config ~/.config/yt-dlp/config
 # rabbitmq-server configuration
 
 $ sudo apt-get install -y erlang-base erlang-asn1 erlang-crypto erlang-eldap erlang-ftp erlang-inets erlang-mnesia erlang-os-mon erlang-parsetools erlang-public-key erlang-runtime-tools erlang-snmp erlang-ssl erlang-syntax-tools erlang-tftp erlang-tools erlang-xmerl
-
 $ sudo apt-get install rabbitmq-server -y --fix-missing
 
 # enable management plugin
 
 $ sudo rabbitmq-plugins enable rabbitmq_management
+
+# create user
+
+$ sudo rabbitmqctl add_user deltamas Delta@123!
+$ sudo rabbitmqctl set_user_tags deltamas administrator
 ```
